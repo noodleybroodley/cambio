@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const SpotifyWebApi = require('spotify-web-api-node');
+const MusicKit = require('node-musickit-api/personalized');
 require('dotenv').config();
 
 let spotifyApi = new SpotifyWebApi({
@@ -29,17 +30,6 @@ app.get("/api/login", (req, res) => {
 app.get("/api/logout", (req, res) => {
     spotifyApi.setAccessToken("");
     res.json(spotifyApi);
-})
-app.get("/api/test", (req, res) => {
-    spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE', { limit: 10, offset: 20 })
-        .then(
-            function (data) {
-                console.log(data.body);
-                res.send(data);
-            },
-            function (err) {
-                console.error(err);
-            })
 })
 
 function extractSongName(str) {
@@ -103,6 +93,7 @@ app.get("/api/getPlaylist/:id", async (req, res) => {
 
 //Apple Music
 
+let appleApi;
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 
@@ -122,6 +113,12 @@ const token = jwt.sign({}, private_key, {
 
 app.get('/api/appleToken', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    // appleApi = new MusicKit({
+    //     key: `${process.env.APPLE_MUSIC_SECRET}`,
+    //     teamId: `${process.env.APPLE_MUSIC_TEAM_ID}`,
+    //     keyId: `${process.env.APPLE_MUSIC_ID}`,
+    //     userToken: token
+    // });
     res.send(JSON.stringify({ token: token }))
 })
 

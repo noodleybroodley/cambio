@@ -98,8 +98,8 @@ const jwt = require('jsonwebtoken')
 const fs = require('fs')
 
 const private_key = `${process.env.APPLE_MUSIC_SECRET}`
-const team_id = ''
-const key_id = ''
+const team_id = `${process.env.APPLE_MUSIC_TEAM_ID}`
+const key_id = `${process.env.APPLE_MUSIC_ID}`
 
 const token = jwt.sign({}, private_key, {
     algorithm: 'ES256',

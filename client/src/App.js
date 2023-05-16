@@ -14,8 +14,8 @@ export function App() {
             .then(res => {
                 console.log("Spotify Auth Successful!: ", res)
             }).catch(error => { console.log(error) })
-            let kit = await getMusicKitInstance();
-            setMusicKit(kit);
+        let kit = await getMusicKitInstance();
+        setMusicKit(kit);
     };
 
     useEffect(() => {

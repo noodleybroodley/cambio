@@ -1,51 +1,26 @@
 import './App.css';
 import { useState, useEffect } from 'react';
+import { addToAppleLibrary, getMusicKitInstance } from './Apple/Apple-Helpers';
 
 
 export function App() {
     const [playlistID, setPlaylistID] = useState("");
     const [playlistName, setPlaylistName] = useState("");
     const [playlist, setPlaylist] = useState(undefined);
+    const [musicKit, setMusicKit] = useState(undefined);
 
-    function login() {
-        fetch("/api/login").then(
-            function (data) {
-                console.log("successfully logged in: ", data)
-            },
-            function (err) {
-                console.log(
-                    'Something went wrong when retrieving an access token',
-                    err.message
-                );
-            }
-        )
-        fetch("/api/appleToken").then(
-            function (data) {
-                console.log("apple music token: ",data)
-            },
-            function (err) {
-                console.log(
-                    'Something went wrong when retrieving an access token',
-                    err.message
-                );
-            }
-        )
-    }
+    async function login() {
+        fetch("/api/login").then(response => response.json())
+            .then(res => {
+                console.log("Spotify Auth Successful!: ", res)
+            }).catch(error => { console.log(error) })
+        let kit = await getMusicKitInstance();
+        setMusicKit(kit);
+    };
+
     useEffect(() => {
         login();
     }, []);
-
-    function getAlbumInfo() {
-        fetch("/api/test").then(
-            function (data) {
-                // const result = await streamToString(data.body)
-                console.log(data)
-            },
-            function (err) {
-                console.log('Could not retrieve album info')
-            }
-        )
-    }
 
     function getPlaylistTracks() {
         let route = "/api/getPlaylist/" + playlistID;
@@ -85,7 +60,10 @@ export function App() {
                             New Playlist Name:
                             <form onSubmit={(e) => {
                                 e.preventDefault();
-                                console.log('convert!');
+                                musicKit.authorize().then((val)=>{
+                                    console.log(val)
+                                    addToAppleLibrary(playlist, playlistName);
+                                })
                             }}>
                                 <input type="text" onChange={e => {
                                     let name = e.target.value;

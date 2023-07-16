@@ -1,6 +1,6 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import { getMusicKitInstance } from './Apple/Apple-Helpers';
+import { addToAppleLibrary, getMusicKitInstance } from './Apple/Apple-Helpers';
 
 
 export function App() {
@@ -60,7 +60,10 @@ export function App() {
                             New Playlist Name:
                             <form onSubmit={(e) => {
                                 e.preventDefault();
-                                musicKit.authorize();
+                                musicKit.authorize().then((val)=>{
+                                    console.log(val)
+                                    addToAppleLibrary(playlist, playlistName);
+                                })
                             }}>
                                 <input type="text" onChange={e => {
                                     let name = e.target.value;

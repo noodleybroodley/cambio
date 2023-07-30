@@ -72,17 +72,8 @@ export function findSong(artist, song, resolve, reject, headers) {
     var url1 = 'https://api.music.apple.com/v1/catalog/us/search?term=' + extractedSong + '&limit=25&types=songs'
     var url2 = 'https://api.music.apple.com/v1/catalog/us/search?term=' + searchparam + '&limit=25&types=songs'
 
-    // new Promise(async (resolve, reject) => {
-    //     await apiSearchHelper(url1, url2, resolve, reject, artist, song, 1, musicKit);
-    // })
-    //     .then((result) => {
-    //         resolve(result)
-    //     }).catch((error) => {
-    //         console.log(error);
-    //     })
-    // let headers = await getHeader(musicKit);
     new Promise(async (resolve, reject) => {
-        await apiSearchHelper(url1, url2, resolve, reject, artist, song, 1, headers);
+        await apiSearchHelper2(url1, url2, resolve, reject, artist, song, 1, headers);
     })
         .then((result) => {
             resolve(result)
@@ -91,243 +82,236 @@ export function findSong(artist, song, resolve, reject, headers) {
         })
 }
 
-export async function apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers) {
+// export function apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers) {
+//     let data = {};
+
+//     fetch(url, {
+//         headers: headers
+//     }).then((response) => {
+//         var res = response.json()
+//         var status = response.status;
+//         res.then((response) => {
+//             if (status !== 200) {
+//                 if (delay > 10000) {
+//                     return
+//                 }
+//                 if (status === 429) {
+//                     console.log(response.message)
+//                     console.log("we got in the after 429")
+//                     delay = delay * 2
+//                     console.log("retrying after seconds: " + delay)
+//                     setTimeout(() => {
+//                         console.log('Calling recursive function')
+//                         apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers);
+//                     }, delay * 1000);
+//                 }
+
+//                 if (status === 400) {
+//                     console.log('We got a 400 because of ' + song + ' by ' + artist)
+//                     resolve({ id: `We could not find ${song} by ${artist}` })
+//                 }
+
+//                 return
+//             }
+//             let added = false
+//             if (response.results.songs !== undefined) {
+//                 for (var i = 0; i < response.results.songs.data.length; i++) {
+//                     if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
+//                         data.id = response.results.songs.data[i].id
+//                         data.type = 'songs'
+//                         resolve(data)
+//                         added = true;
+//                         break;
+//                     }
+//                 }
+//             }
+
+//             if (added) {
+//                 return;
+//             }
+
+//             fetch(url2, {
+//                 headers: headers
+//             }).then((response) => {
+//                 var res = response.json()
+//                 var status = response.status;
+//                 res.then((response) => {
+//                     if (status !== 200) {
+//                         if (delay > 10000) {
+//                             return
+//                         }
+
+//                         console.log("Tried URL Two, URL One did not work")
+//                         if (status === 429) {
+//                             console.log(response.message)
+//                             console.log("we got in the after 429")
+//                             console.log("retrying after milliseconds: " + delay)
+//                             delay = delay * 2
+//                             setTimeout(() => {
+//                                 apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
+//                             }, delay * 1000);
+//                         }
+
+//                         if (status === 400) {
+//                             console.log('We got a 400 because of ' + song + ' by ' + artist)
+//                             resolve({ id: `We could not find ${song} by ${artist}` })
+//                         }
+
+//                         return
+//                     }
+//                     let added = false
+//                     if (response.results.songs !== undefined) {
+//                         for (var i = 0; i < response.results.songs.data.length; i++) {
+//                             if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
+//                                 data.id = response.results.songs.data[i].id
+//                                 data.type = 'songs'
+//                                 added = true;
+//                                 resolve(data)
+//                                 break;
+//                             }
+//                         }
+//                     }
+
+//                     if (!added) {
+//                         resolve({ id: `We could not find ${song} by ${artist}` })
+//                     }
+//                 })
+//             }).catch((error) => {
+//                 console.log('Error', error)
+//                 if (delay > 10000) {
+//                     return
+//                 }
+
+//                 delay = delay * 2
+//                 setTimeout(() => {
+//                     apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
+//                 }, delay * 1000);
+//             })
+
+//         }).catch((error) => {
+//             console.log("caught dat thang", error)
+//         })
+//     }).catch((error) => {
+//         console.log('Error', error)
+//         if (delay > 10000) {
+//             return
+//         }
+
+//         delay = delay * 2
+//         setTimeout(() => {
+//             apiSearchHelper(url, resolve, reject, artist, song, delay, headers)
+//         }, delay * 1000);
+//     })
+// }
+
+export async function apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers) {
     let data = {};
-    
+
     await fetch(url, {
         headers: headers
-    }).then((response) => {
-        var res = response.json()
-        var status = response.status;
-        res.then((response) => {
-            if (status !== 200) {
-                if (delay > 10000) {
-                    return
-                }
-                if (status === 429) {
-                    console.log(response.message)
-                    console.log("we got in the after 429")
-                    delay = delay * 2
-                    console.log("retrying after seconds: " + delay)
-                    setTimeout(async () => {
-                        console.log('Calling recursive function')
-                        await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers);
-                    }, delay * 1000);
-                }
-
-                if (status === 400) {
-                    console.log('We got a 400 because of ' + song + ' by ' + artist)
-                    resolve({ id: `We could not find ${song} by ${artist}` })
-                }
-
+    }).then(async (response) => {
+        console.log("response", response)
+        if (response.status !== 200) {
+            if (delay > 10000) {
                 return
             }
-            let added = false
-            if (response.results.songs !== undefined) {
-                for (var i = 0; i < response.results.songs.data.length; i++) {
-                    if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-                        data.id = response.results.songs.data[i].id
-                        data.type = 'songs'
-                        resolve(data)
-                        added = true;
-                        break;
-                    }
-                }
-            }
-
-            if (added) {
-                return;
-            }
-
-            fetch(url2, {
-                headers: headers
-            }).then((response) => {
-                var res = response.json()
-                var status = response.status;
-                res.then((response) => {
-                    if (status !== 200) {
-                        if (delay > 10000) {
-                            return
-                        }
-
-                        console.log("Tried URL Two, URL One did not work")
-                        if (status === 429) {
-                            console.log(response.message)
-                            console.log("we got in the after 429")
-                            console.log("retrying after milliseconds: " + delay)
-                            delay = delay * 2
-                            setTimeout(async () => {
-                                await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
-                            }, delay * 1000);
-                        }
-
-                        if (status === 400) {
-                            console.log('We got a 400 because of ' + song + ' by ' + artist)
-                            resolve({ id: `We could not find ${song} by ${artist}` })
-                        }
-
-                        return
-                    }
-                    let added = false
-                    if (response.results.songs !== undefined) {
-                        for (var i = 0; i < response.results.songs.data.length; i++) {
-                            if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-                                data.id = response.results.songs.data[i].id
-                                data.type = 'songs'
-                                added = true;
-                                resolve(data)
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!added) {
-                        resolve({ id: `We could not find ${song} by ${artist}` })
-                    }
-                })
-            }).catch((error) => {
-                console.log('Error', error)
-                if (delay > 10000) {
-                    return
-                }
+            if (response.status === 429) {
+                console.log("handling 429")
 
                 delay = delay * 2
+                console.log("retrying after seconds: " + delay)
                 setTimeout(async () => {
-                    await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
+                    console.log('Calling recursive function')
+                    await apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers);
                 }, delay * 1000);
-            })
+            }
 
-        })
-    }).catch((error) => {
-        console.log('Error', error)
-        if (delay > 10000) {
+            if (response.status === 400) {
+                console.log('We got a 400 because of ' + song + ' by ' + artist)
+                resolve({ id: `We could not find ${song} by ${artist}` })
+            }
+
             return
         }
-
-        delay = delay * 2
-        setTimeout(async () => {
-            await apiSearchHelper(url, resolve, reject, artist, song, delay, headers)
-        }, delay * 1000);
-    })
-}
-
-export function newSearch(url, url2, resolve, reject, artist, song, delay, headers) {
-    let data = {};
-    fetch(url, {
-        headers: headers
-    }).then((response) => {
-        var res = response.json()
-        var status = response.status;
-        res.then((response) => {
-            if (status !== 200) {
-                if (delay > 10000) {
-                    return
-                }
-                if (status === 429) {
-                    console.log(response.message)
-                    console.log("we got in the after 429")
-                    delay = delay * 2
-                    console.log("retrying after seconds: " + delay)
-                    setTimeout(() => {
-                        console.log('Calling recursive function')
-                        newSearch(url, url2, resolve, reject, artist, song, delay, headers);
-                    }, delay * 1000);
-                }
-
-                if (status === 400) {
-                    console.log('We got a 400 because of ' + song + ' by ' + artist)
-                    resolve({ id: `We could not find ${song} by ${artist}` })
-                }
-
-                return
-            }
-            let added = false
-            if (response.results.songs !== undefined) {
-                for (var i = 0; i < response.results.songs.data.length; i++) {
-                    if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-                        data.id = response.results.songs.data[i].id
-                        data.type = 'songs'
-                        resolve(data)
-                        added = true;
-                        break;
-                    }
+        let added = false
+        let res = await response.json();
+        if (res.results.songs !== undefined) {
+            for (var i = 0; i < res.results.songs.data.length; i++) {
+                if (artistExists(artist, splitArtists(res.results.songs.data[i].attributes.artistName))) {
+                    data.id = res.results.songs.data[i].id
+                    data.type = 'songs'
+                    resolve(data)
+                    added = true;
+                    break;
                 }
             }
+        }
 
-            if (added) {
-                return;
-            }
+        if (added) {
+            return;
+        }
 
-            fetch(url2, {
-                headers: headers
-            }).then((response) => {
-                var res = response.json()
-                var status = response.status;
-                res.then((response) => {
-                    if (status !== 200) {
-                        if (delay > 10000) {
-                            return
-                        }
-
-                        console.log("Tried URL Two, URL One did not work")
-                        if (status === 429) {
-                            console.log(response.message)
-                            console.log("we got in the after 429")
-                            console.log("retrying after milliseconds: " + delay)
-                            delay = delay * 2
-                            setTimeout(() => {
-                                newSearch(url, url2, resolve, reject, artist, song, delay, headers)
-                            }, delay * 1000);
-                        }
-
-                        if (status === 400) {
-                            console.log('We got a 400 because of ' + song + ' by ' + artist)
-                            resolve({ id: `We could not find ${song} by ${artist}` })
-                        }
-
+        await fetch(url2, {
+            headers: headers
+        }).then(async (response) => {
+            
+                if (response.status !== 200) {
+                    if (delay > 10000) {
                         return
                     }
-                    let added = false
-                    if (response.results.songs !== undefined) {
-                        for (var i = 0; i < response.results.songs.data.length; i++) {
-                            if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-                                data.id = response.results.songs.data[i].id
-                                data.type = 'songs'
-                                added = true;
-                                resolve(data)
-                                break;
-                            }
-                        }
+
+                    console.log("Tried URL Two, URL One did not work")
+                    if (response.status === 429) {
+                        console.log(response.message)
+                        console.log("we got in the after 429")
+                        console.log("retrying after milliseconds: " + delay)
+                        delay = delay * 2
+                        setTimeout(() => {
+                            apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers)
+                        }, delay * 1000);
                     }
 
-                    if (!added) {
+                    if (response.status === 400) {
+                        console.log('We got a 400 because of ' + song + ' by ' + artist)
                         resolve({ id: `We could not find ${song} by ${artist}` })
                     }
-                })
-            }).catch((error) => {
-                console.log('Error', error)
-                if (delay > 10000) {
+
                     return
                 }
+                let added = false
+                let res = await response.json();
+                if (res.results.songs !== undefined) {
+                    for (var i = 0; i < res.results.songs.data.length; i++) {
+                        if (artistExists(artist, splitArtists(res.results.songs.data[i].attributes.artistName))) {
+                            data.id = res.results.songs.data[i].id
+                            data.type = 'songs'
+                            added = true;
+                            resolve(data)
+                            break;
+                        }
+                    }
+                }
 
-                delay = delay * 2
-                setTimeout(() => {
-                    newSearch(url, url2, resolve, reject, artist, song, delay, headers)
-                }, delay * 1000);
-            })
+                if (!added) {
+                    resolve({ id: `We could not find ${song} by ${artist}` })
+                }
+            
+        }).catch((error) => {
+            console.log('Error', error)
+            if (delay > 10000) {
+                return
+            }
 
+            delay = delay * 2
+            setTimeout(() => {
+                apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers)
+            }, delay * 1000);
         })
-    }).catch((error) => {
-        console.log('Error', error)
-        if (delay > 10000) {
-            return
-        }
 
-        delay = delay * 2
-        setTimeout(() => {
-            newSearch(url, url2, resolve, reject, artist, song, delay, headers)
-        }, delay * 1000);
+
     })
+
+
 }
 
 export async function createPlaylistInAppleLib(thePlayList, headers) {
@@ -369,7 +353,7 @@ export async function createPlaylistInAppleLib(thePlayList, headers) {
                 console.log("There was an error creating the playlis with the songs")
                 return;
             }
-            console.log("Added the songs to spotify, success !");
+            console.log("Successfully Converted from Spotify to Apple Music!");
             return;
         })
     }).catch((error) => {

@@ -1,10 +1,8 @@
-
 export async function getMusicKitInstance() {
     const appleInstance = window.MusicKit;
     let musicKit;
     return fetch("/api/appleToken").then(response => response.json())
         .then(res => {
-            console.log("Apple Music Dev Token: ", res);
             appleInstance.configure({
                 developerToken: res.token,
                 app: {
@@ -13,7 +11,7 @@ export async function getMusicKitInstance() {
                 }
             });
             musicKit = appleInstance.getInstance();
-            console.log("Music Kit Instance: ", musicKit)
+            console.log("got music instance");
             return musicKit;
         })
         .catch((error) => {
@@ -21,20 +19,22 @@ export async function getMusicKitInstance() {
         })
 }
 
-export async function getHeader() {
-    let kit = await getMusicKitInstance();
+export async function getHeader(musicKit) {
+    console.log("getHeader")
+    // let kit = await getMusicKitInstance();
 
     const header = {
-        Authorization: `Bearer ${kit.developerToken}`,
+        Authorization: `Bearer ${musicKit.developerToken}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'Music-User-Token': kit.musicUserToken
+        'Music-User-Token': musicKit.musicUserToken
     }
     return header
 }
 
-export function addToAppleLibrary(playlist,name) {
+export async function addToAppleLibrary(playlist, name, musicKit) {
 
+    console.log("addToAppleLibrary")
 
     var songsInPlaylists = [];
 
@@ -46,22 +46,20 @@ export function addToAppleLibrary(playlist,name) {
         songsInPlaylists.push({ a_name: item.artistName[0], t_name: item.trackName })
     })
 
-    return Promise.all([
-        songsInPlaylists.map((song) =>
-            new Promise((resolve, reject) => {
-                findSong(song.a_name, song.t_name, resolve, reject)
-            }))
-    ]).then((res) => {
-        Promise.all(res[0])
-            .then(async (resolvedPlaylist) => {
-                const invalidSongs = await createPlaylistInAppleLib({ name: name, tracks: resolvedPlaylist });
-                console.log(invalidSongs);
-            })
-    })
+    const res = await Promise.all([
+        songsInPlaylists.map((song) => new Promise((resolve, reject) => {
+            findSong(song.a_name, song.t_name, resolve, reject, musicKit);
+        }))
+    ]);
+    Promise.all(res[0])
+        .then(async (resolvedPlaylist) => {
+            const invalidSongs = await createPlaylistInAppleLib({ name: name, tracks: resolvedPlaylist }, musicKit);
+            console.log("Invalid Songs: ", invalidSongs);
+        });
 
 }
 
-export function findSong(artist, song, resolve, reject) {
+export function findSong(artist, song, resolve, reject, musicKit) {
 
     let extractedSong = extractSongNameVerbose(song)
     let searchparam = artist + ' ' + extractedSong.replace(/ /g, '+')
@@ -72,8 +70,17 @@ export function findSong(artist, song, resolve, reject) {
     var url1 = 'https://api.music.apple.com/v1/catalog/us/search?term=' + extractedSong + '&limit=25&types=songs'
     var url2 = 'https://api.music.apple.com/v1/catalog/us/search?term=' + searchparam + '&limit=25&types=songs'
 
+    // new Promise(async (resolve, reject) => {
+    //     await apiSearchHelper(url1, url2, resolve, reject, artist, song, 1, musicKit);
+    // })
+    //     .then((result) => {
+    //         resolve(result)
+    //     }).catch((error) => {
+    //         console.log(error);
+    //     })
+    // let headers = await getHeader(musicKit);
     new Promise(async (resolve, reject) => {
-        await apiSearchHelper(url1, url2, resolve, reject, artist, song, 1);
+        await apiSearchHelper(url1, url2, resolve, reject, artist, song, 1, musicKit);
     })
         .then((result) => {
             resolve(result)
@@ -82,10 +89,128 @@ export function findSong(artist, song, resolve, reject) {
         })
 }
 
-
-export async function apiSearchHelper(url, url2, resolve, reject, artist, song, delay) {
+export async function apiSearchHelper(url, url2, resolve, reject, artist, song, delay, musicKit) {
     let data = {};
-    let headers = await getHeader();
+    let headers = await getHeader(musicKit);
+    await fetch(url, {
+        headers: headers
+    }).then((response) => {
+        var res = response.json()
+        var status = response.status;
+        res.then((response) => {
+            if (status !== 200) {
+                if (delay > 10000) {
+                    return
+                }
+                if (status === 429) {
+                    console.log(response.message)
+                    console.log("we got in the after 429")
+                    delay = delay * 2
+                    console.log("retrying after seconds: " + delay)
+                    setTimeout(async () => {
+                        console.log('Calling recursive function')
+                        await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, musicKit);
+                    }, delay * 1000);
+                }
+
+                if (status === 400) {
+                    console.log('We got a 400 because of ' + song + ' by ' + artist)
+                    resolve({ id: `We could not find ${song} by ${artist}` })
+                }
+
+                return
+            }
+            let added = false
+            if (response.results.songs !== undefined) {
+                for (var i = 0; i < response.results.songs.data.length; i++) {
+                    if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
+                        data.id = response.results.songs.data[i].id
+                        data.type = 'songs'
+                        resolve(data)
+                        added = true;
+                        break;
+                    }
+                }
+            }
+
+            if (added) {
+                return;
+            }
+
+            fetch(url2, {
+                headers: headers
+            }).then((response) => {
+                var res = response.json()
+                var status = response.status;
+                res.then((response) => {
+                    if (status !== 200) {
+                        if (delay > 10000) {
+                            return
+                        }
+
+                        console.log("Tried URL Two, URL One did not work")
+                        if (status === 429) {
+                            console.log(response.message)
+                            console.log("we got in the after 429")
+                            console.log("retrying after milliseconds: " + delay)
+                            delay = delay * 2
+                            setTimeout(async () => {
+                                await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, musicKit)
+                            }, delay * 1000);
+                        }
+
+                        if (status === 400) {
+                            console.log('We got a 400 because of ' + song + ' by ' + artist)
+                            resolve({ id: `We could not find ${song} by ${artist}` })
+                        }
+
+                        return
+                    }
+                    let added = false
+                    if (response.results.songs !== undefined) {
+                        for (var i = 0; i < response.results.songs.data.length; i++) {
+                            if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
+                                data.id = response.results.songs.data[i].id
+                                data.type = 'songs'
+                                added = true;
+                                resolve(data)
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!added) {
+                        resolve({ id: `We could not find ${song} by ${artist}` })
+                    }
+                })
+            }).catch((error) => {
+                console.log('Error', error)
+                if (delay > 10000) {
+                    return
+                }
+
+                delay = delay * 2
+                setTimeout(async () => {
+                    await apiSearchHelper(url, url2, resolve, reject, artist, song, delay, musicKit)
+                }, delay * 1000);
+            })
+
+        })
+    }).catch((error) => {
+        console.log('Error', error)
+        if (delay > 10000) {
+            return
+        }
+
+        delay = delay * 2
+        setTimeout(async () => {
+            await apiSearchHelper(url, resolve, reject, artist, song, delay, musicKit)
+        }, delay * 1000);
+    })
+}
+
+export function newSearch(url, url2, resolve, reject, artist, song, delay, headers) {
+    let data = {};
     fetch(url, {
         headers: headers
     }).then((response) => {
@@ -103,7 +228,7 @@ export async function apiSearchHelper(url, url2, resolve, reject, artist, song, 
                     console.log("retrying after seconds: " + delay)
                     setTimeout(() => {
                         console.log('Calling recursive function')
-                        apiSearchHelper(url, url2, resolve, reject, artist, song, delay)
+                        newSearch(url, url2, resolve, reject, artist, song, delay, headers);
                     }, delay * 1000);
                 }
 
@@ -149,7 +274,7 @@ export async function apiSearchHelper(url, url2, resolve, reject, artist, song, 
                             console.log("retrying after milliseconds: " + delay)
                             delay = delay * 2
                             setTimeout(() => {
-                                apiSearchHelper(url, url2, resolve, reject, artist, song, delay)
+                                newSearch(url, url2, resolve, reject, artist, song, delay, headers)
                             }, delay * 1000);
                         }
 
@@ -185,7 +310,7 @@ export async function apiSearchHelper(url, url2, resolve, reject, artist, song, 
 
                 delay = delay * 2
                 setTimeout(() => {
-                    apiSearchHelper(url, url2, resolve, reject, artist, song, delay)
+                    newSearch(url, url2, resolve, reject, artist, song, delay, headers)
                 }, delay * 1000);
             })
 
@@ -198,15 +323,15 @@ export async function apiSearchHelper(url, url2, resolve, reject, artist, song, 
 
         delay = delay * 2
         setTimeout(() => {
-            apiSearchHelper(url, resolve, reject, artist, song, delay)
+            newSearch(url, url2, resolve, reject, artist, song, delay, headers)
         }, delay * 1000);
     })
 }
 
-export async function createPlaylistInAppleLib(thePlayList) {
+export async function createPlaylistInAppleLib(thePlayList, musicKit) {
     var validIDs = [];
     var invalidSongs = [];
-    const headers = await getHeader();
+    const headers = await getHeader(musicKit);
     thePlayList.tracks.forEach((t) => {
         if (t.id.includes("We could not find")) {
             invalidSongs.push(t.id.toString().substring(18))

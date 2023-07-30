@@ -60,9 +60,8 @@ export function App() {
                             New Playlist Name:
                             <form onSubmit={(e) => {
                                 e.preventDefault();
-                                musicKit.authorize().then((val)=>{
-                                    console.log(val)
-                                    addToAppleLibrary(playlist, playlistName);
+                                musicKit.authorize().then(async (val)=>{
+                                    await addToAppleLibrary(playlist, playlistName, musicKit);
                                 })
                             }}>
                                 <input type="text" onChange={e => {

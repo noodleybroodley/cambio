@@ -1,4 +1,9 @@
 export async function getMusicKitInstance() {
+    /** Gets MusicKit Instance using Apple Dev Token
+     * 
+     * Params: n/a
+     * Return: MusicKit Instance
+    */
     const appleInstance = window.MusicKit;
     let musicKit;
     return fetch("/api/appleToken").then(response => response.json())
@@ -19,31 +24,50 @@ export async function getMusicKitInstance() {
         })
 }
 
-export async function getHeader(musicKit) {
+export async function getHeaders(musicKit) {
+    /**Creates Headers for MusicKit API Requests
+     * 
+     * Params: MusicKit Instance
+     * Return: Headers Object
+    */
 
-    const header = {
+    const headers = {
         Authorization: `Bearer ${musicKit.developerToken}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'Music-User-Token': musicKit.musicUserToken
     }
-    return header
+    return headers
 }
 
 export async function addToAppleLibrary(playlist, name, musicKit) {
+    /**Creates a new Apple Music playlist using tracks from the given Spotify Playlist.
+     * 
+     * Params:
+     * playlist: {albumArtist: String[], albumName: String, artistName: String[], trackName: String}
+     * name: String
+     * musicKit: MusicKit Instance
+     * 
+     * Return:
+     * Promise<void>
+    */
+
     var songsInPlaylists = [];
     playlist.forEach((item) => {
         songsInPlaylists.push({ a_name: item.artistName[0], t_name: item.trackName })
     })
 
-    const headers = await getHeader(musicKit);
+    const headers = await getHeaders(musicKit);
 
-    const res = await Promise.all([
+    //create a list of promises that will search for each song
+    const res = await Promise.all(
         songsInPlaylists.map((song) => new Promise((resolve, reject) => {
-            findSong(song.a_name, song.t_name, resolve, reject, headers);
+            findSong(song.a_name, song.t_name, resolve, headers);
         }))
-    ]);
-    Promise.all(res[0])
+    );
+
+    //fulfill all promises in the list and use the resulting playlist to create a new Apple Music Playlist
+    Promise.all(res)
         .then(async (resolvedPlaylist) => {
             const invalidSongs = await createPlaylistInAppleLib({ name: name, tracks: resolvedPlaylist }, headers);
             console.log("Invalid Songs: ", invalidSongs);
@@ -51,8 +75,15 @@ export async function addToAppleLibrary(playlist, name, musicKit) {
 
 }
 
-export function findSong(artist, song, resolve, reject, headers) {
-
+export function findSong(artist, song, resolve, headers) {
+    /**Searches either for the given song or the song and the artists
+     * 
+     * Params:
+     * artist: String
+     * song: String
+     * resolve: Function (resolves outer promise with song value)
+     * headers: Headers Object
+    */
     let extractedSong = extractSongNameVerbose(song)
     let searchparam = artist + ' ' + extractedSong.replace(/ /g, '+')
 
@@ -63,7 +94,7 @@ export function findSong(artist, song, resolve, reject, headers) {
     var url2 = 'https://api.music.apple.com/v1/catalog/us/search?term=' + searchparam + '&limit=25&types=songs'
 
     new Promise(async (resolve, reject) => {
-        await apiSearchHelper2(url1, url2, resolve, reject, artist, song, 1, headers);
+        await apiSearchHelper(url1, url2, resolve, artist, song, 1, headers);
     })
         .then((result) => {
             resolve(result)
@@ -72,146 +103,40 @@ export function findSong(artist, song, resolve, reject, headers) {
         })
 }
 
-// export function apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers) {
-//     let data = {};
-
-//     fetch(url, {
-//         headers: headers
-//     }).then((response) => {
-//         var res = response.json()
-//         var status = response.status;
-//         res.then((response) => {
-//             if (status !== 200) {
-//                 if (delay > 10000) {
-//                     return
-//                 }
-//                 if (status === 429) {
-//                     console.log(response.message)
-//                     console.log("we got in the after 429")
-//                     delay = delay * 2
-//                     console.log("retrying after seconds: " + delay)
-//                     setTimeout(() => {
-//                         console.log('Calling recursive function')
-//                         apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers);
-//                     }, delay * 1000);
-//                 }
-
-//                 if (status === 400) {
-//                     console.log('We got a 400 because of ' + song + ' by ' + artist)
-//                     resolve({ id: `We could not find ${song} by ${artist}` })
-//                 }
-
-//                 return
-//             }
-//             let added = false
-//             if (response.results.songs !== undefined) {
-//                 for (var i = 0; i < response.results.songs.data.length; i++) {
-//                     if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-//                         data.id = response.results.songs.data[i].id
-//                         data.type = 'songs'
-//                         resolve(data)
-//                         added = true;
-//                         break;
-//                     }
-//                 }
-//             }
-
-//             if (added) {
-//                 return;
-//             }
-
-//             fetch(url2, {
-//                 headers: headers
-//             }).then((response) => {
-//                 var res = response.json()
-//                 var status = response.status;
-//                 res.then((response) => {
-//                     if (status !== 200) {
-//                         if (delay > 10000) {
-//                             return
-//                         }
-
-//                         console.log("Tried URL Two, URL One did not work")
-//                         if (status === 429) {
-//                             console.log(response.message)
-//                             console.log("we got in the after 429")
-//                             console.log("retrying after milliseconds: " + delay)
-//                             delay = delay * 2
-//                             setTimeout(() => {
-//                                 apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
-//                             }, delay * 1000);
-//                         }
-
-//                         if (status === 400) {
-//                             console.log('We got a 400 because of ' + song + ' by ' + artist)
-//                             resolve({ id: `We could not find ${song} by ${artist}` })
-//                         }
-
-//                         return
-//                     }
-//                     let added = false
-//                     if (response.results.songs !== undefined) {
-//                         for (var i = 0; i < response.results.songs.data.length; i++) {
-//                             if (artistExists(artist, splitArtists(response.results.songs.data[i].attributes.artistName))) {
-//                                 data.id = response.results.songs.data[i].id
-//                                 data.type = 'songs'
-//                                 added = true;
-//                                 resolve(data)
-//                                 break;
-//                             }
-//                         }
-//                     }
-
-//                     if (!added) {
-//                         resolve({ id: `We could not find ${song} by ${artist}` })
-//                     }
-//                 })
-//             }).catch((error) => {
-//                 console.log('Error', error)
-//                 if (delay > 10000) {
-//                     return
-//                 }
-
-//                 delay = delay * 2
-//                 setTimeout(() => {
-//                     apiSearchHelper(url, url2, resolve, reject, artist, song, delay, headers)
-//                 }, delay * 1000);
-//             })
-
-//         }).catch((error) => {
-//             console.log("error: ", error)
-//         })
-//     }).catch((error) => {
-//         console.log('Error', error)
-//         if (delay > 10000) {
-//             return
-//         }
-
-//         delay = delay * 2
-//         setTimeout(() => {
-//             apiSearchHelper(url, resolve, reject, artist, song, delay, headers)
-//         }, delay * 1000);
-//     })
-// }
-
-export async function apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers) {
+export async function apiSearchHelper(url, url2, resolve, artist, song, delay, headers) {
+    /**Searches either for the given song or the song and the artists
+     * 
+     * Params:
+     * url: search url with song name
+     * url2: search url with song name and artist
+     * resolve: function that resolves outer promise
+     * artist: String
+     * song: String
+     * delay: Number
+     * headers: Headers object
+     * 
+     * Return:
+     * Promise<void>
+     */
     let data = {};
 
     await fetch(url, {
         headers: headers
     }).then(async (response) => {
+        
         if (response.status !== 200) {
             if (delay > 10000) {
                 return
             }
             if (response.status === 429) {
+                //if first url search was unsuccessful due to "429: Too Many Requests Error", retry search after a delay
                 console.log("handling 429")
 
                 delay = delay * 2
                 console.log("retrying after seconds: " + delay)
                 setTimeout(async () => {
                     console.log('Calling recursive function')
-                    await apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers);
+                    await apiSearchHelper(url, url2, resolve, artist, song, delay, headers);
                 }, delay * 1000);
             }
 
@@ -251,11 +176,12 @@ export async function apiSearchHelper2(url, url2, resolve, reject, artist, song,
 
                     console.log("Tried URL Two, URL One did not work")
                     if (response.status === 429) {
+                        //if url2 search was unsuccessful due to "429: Too Many Requests Error", retry search after a delay
                         console.log("we got in the after 429")
                         console.log("retrying after milliseconds: " + delay)
                         delay = delay * 2
-                        setTimeout(() => {
-                            apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers)
+                        setTimeout(async () => {
+                            await apiSearchHelper(url, url2, resolve, artist, song, delay, headers)
                         }, delay * 1000);
                     }
 
@@ -291,8 +217,8 @@ export async function apiSearchHelper2(url, url2, resolve, reject, artist, song,
             }
 
             delay = delay * 2
-            setTimeout(() => {
-                apiSearchHelper2(url, url2, resolve, reject, artist, song, delay, headers)
+            setTimeout(async() => {
+                await apiSearchHelper(url, url2, resolve, artist, song, delay, headers)
             }, delay * 1000);
         })
 
@@ -303,6 +229,14 @@ export async function apiSearchHelper2(url, url2, resolve, reject, artist, song,
 }
 
 export async function createPlaylistInAppleLib(thePlayList, headers) {
+    /**Create new Apple Music Playlist using given track IDs and playlist name; returns list of invalid songs
+     * 
+     * Params:
+     * thePlaylist: { name: String, tracks: {id: String, type: String}[] }
+     * headers: Headers Object
+     * 
+     * Return: String[]
+    */
     var validIDs = [];
     var invalidSongs = [];
     thePlayList.tracks.forEach((t) => {
@@ -351,6 +285,13 @@ export async function createPlaylistInAppleLib(thePlayList, headers) {
 }
 
 export function extractSongNameVerbose(str) {
+    /**Takes raw song name, strips extraneous terms and returns song name
+     * 
+     * Param:
+     * str: String
+     * 
+     * Return: String
+    */
     // remove (outro)
     // feat
     if (str.includes('(feat. ')) {
@@ -380,13 +321,31 @@ export function extractSongNameVerbose(str) {
 }
 
 export function artistExists(artist, songArtist) {
+    /**Determines if artist appears in song search results.
+     * 
+     * Params:
+     * artist: String
+     * songArtist: String[]
+     * 
+     * Return: Boolean
+    */
+   
     let arr = songArtist.map((artist) => {
         return artist.toLowerCase()
     })
-    return arr.indexOf(artist.toLowerCase()) > -1
+    return arr.findIndex(element => element.includes(artist))
 }
 
 export function splitArtists(artists) {
+    /**Takes artists string and splits it into an array of strings
+     * 
+     * Param:
+     * artists: String
+     * 
+     * Return:
+     * String[]
+     * 
+    */
     let seperatedArtists = []
     let firstSplit = artists.split(', ')
     for (let i = 0; i < firstSplit.length; i++) {

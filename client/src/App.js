@@ -10,6 +10,9 @@ export function App() {
     const [musicKit, setMusicKit] = useState(undefined);
 
     async function login() {
+        /*** Reaches out to the backend, authenticates with Spotify using developer token
+         * and creates an Apple MusicKit instance.
+        */
         fetch("/api/login").then(response => response.json())
             .then(res => {
                 console.log("Spotify Auth Successful!: ", res)
@@ -23,6 +26,7 @@ export function App() {
     }, []);
 
     function getPlaylistTracks() {
+        /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
         let route = "/api/getPlaylist/" + playlistID;
         fetch(route).then(
             function (res) {

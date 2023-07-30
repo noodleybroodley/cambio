@@ -20,8 +20,6 @@ export async function getMusicKitInstance() {
 }
 
 export async function getHeader(musicKit) {
-    console.log("getHeader")
-    // let kit = await getMusicKitInstance();
 
     const header = {
         Authorization: `Bearer ${musicKit.developerToken}`,
@@ -33,15 +31,7 @@ export async function getHeader(musicKit) {
 }
 
 export async function addToAppleLibrary(playlist, name, musicKit) {
-
-    console.log("addToAppleLibrary")
-
     var songsInPlaylists = [];
-
-
-    // store.dispatch(updateCurrentSearchingPlaylist(playlist.name))
-
-    songsInPlaylists = [];
     playlist.forEach((item) => {
         songsInPlaylists.push({ a_name: item.artistName[0], t_name: item.trackName })
     })
@@ -189,7 +179,7 @@ export function findSong(artist, song, resolve, reject, headers) {
 //             })
 
 //         }).catch((error) => {
-//             console.log("caught dat thang", error)
+//             console.log("error: ", error)
 //         })
 //     }).catch((error) => {
 //         console.log('Error', error)
@@ -210,7 +200,6 @@ export async function apiSearchHelper2(url, url2, resolve, reject, artist, song,
     await fetch(url, {
         headers: headers
     }).then(async (response) => {
-        console.log("response", response)
         if (response.status !== 200) {
             if (delay > 10000) {
                 return
@@ -262,7 +251,6 @@ export async function apiSearchHelper2(url, url2, resolve, reject, artist, song,
 
                     console.log("Tried URL Two, URL One did not work")
                     if (response.status === 429) {
-                        console.log(response.message)
                         console.log("we got in the after 429")
                         console.log("retrying after milliseconds: " + delay)
                         delay = delay * 2

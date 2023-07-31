@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const SpotifyWebApi = require('spotify-web-api-node');
-const MusicKit = require('node-musickit-api/personalized');
 require('dotenv').config();
 
 let spotifyApi = new SpotifyWebApi({

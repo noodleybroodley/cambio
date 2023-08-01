@@ -15,7 +15,7 @@ export function App() {
         */
         fetch("/api/login").then(response => response.json())
             .then(res => {
-                console.log("Spotify Auth Successful!: ", res)
+                console.log("Spotify Auth Successful!")
             }).catch(error => { console.log(error) })
         let kit = await getMusicKitInstance();
         setMusicKit(kit);

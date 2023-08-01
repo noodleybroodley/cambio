@@ -10,6 +10,8 @@ let spotifyApi = new SpotifyWebApi({
 });
 
 app.get("/api/login", (req, res) => {
+    /** Reaches out to Spotify API and performs client credentials grant,
+     * then sets the access token for the Spotify Web API instance.*/
     spotifyApi.clientCredentialsGrant().then(
         function (data) {
             console.log('The access token expires in ' + data.body['expires_in']);
@@ -27,11 +29,18 @@ app.get("/api/login", (req, res) => {
     res.json(spotifyApi);
 });
 app.get("/api/logout", (req, res) => {
+    /** Removes Access Token from Spotify Web API instance.*/
     spotifyApi.setAccessToken("");
     res.json(spotifyApi);
 })
 
 function extractSongName(str) {
+    /** Takes a raw song name string and returns just the song title without featured artists
+     * Param:
+     * str: String
+     *
+     * Return:
+     * String*/
     if (str.includes('(feat. ')) {
         return str.substring(0, str.indexOf('(feat. '))
     }
@@ -46,6 +55,13 @@ function extractSongName(str) {
 
 
 async function getAllSongs(id) {
+    /** Gets all tracks from a given Spotify playlist.
+     * Param:
+     * id: String
+     *
+     * Return:
+     * {trackName: String, artistName: String[], albumName: String, albumArtist: String[]}[]
+     * */
     var data = await spotifyApi.getPlaylistTracks(id);
     console.log("playlist: ", data.body);
     var numBatches = Math.floor(data.body.total / 100) + 1;
@@ -82,24 +98,32 @@ async function getAllSongs(id) {
 }
 
 async function getSongs(id, offset) {
+    /** Uses Spotify Web API to get the raw data for each song in a playlist
+     * Params:
+     * id: String
+     * offset: Number}
+     *
+     * Return:
+     * Object*/
     var songs = await spotifyApi.getPlaylistTracks(id, { offset: offset });
+    console.log(songs);
     return songs;
 }
 app.get("/api/getPlaylist/:id", async (req, res) => {
+    /** Backend endpoint for getting all songs in a playlist*/
     var songs = await getAllSongs(req.params.id);
     res.send(songs);
 })
 
 //Apple Music
 
-let appleApi;
 const jwt = require('jsonwebtoken')
-const fs = require('fs')
 
 const private_key = `${process.env.APPLE_MUSIC_SECRET}`
 const team_id = `${process.env.APPLE_MUSIC_TEAM_ID}`
 const key_id = `${process.env.APPLE_MUSIC_ID}`
 
+//Use private key, team id and key id to get Apple Music Auth Token
 const token = jwt.sign({}, private_key, {
     algorithm: 'ES256',
     expiresIn: '180d',
@@ -111,13 +135,8 @@ const token = jwt.sign({}, private_key, {
 })
 
 app.get('/api/appleToken', (req, res) => {
+    /** Endpoint to retrieve Apple Music Token*/
     res.setHeader('Content-Type', 'application/json');
-    // appleApi = new MusicKit({
-    //     key: `${process.env.APPLE_MUSIC_SECRET}`,
-    //     teamId: `${process.env.APPLE_MUSIC_TEAM_ID}`,
-    //     keyId: `${process.env.APPLE_MUSIC_ID}`,
-    //     userToken: token
-    // });
     res.send(JSON.stringify({ token: token }))
 })
 

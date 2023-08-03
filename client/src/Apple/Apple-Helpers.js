@@ -329,11 +329,11 @@ export function artistExists(artist, songArtist) {
      * 
      * Return: Boolean
     */
-   
     let arr = songArtist.map((artist) => {
-        return artist.toLowerCase()
+        return artist.toLowerCase();
     })
-    return arr.findIndex(element => element.includes(artist))
+
+    return arr.findIndex(element => artist.toLowerCase().includes(element)) > -1;
 }
 
 export function splitArtists(artists) {

@@ -1,6 +1,7 @@
 import './App.css';
 import {useState, useEffect} from 'react';
 import {addToAppleLibrary, getMusicKitInstance} from './Apple/Apple-Helpers';
+import CustomizedInputBase from "./components/CustomizedInputBase";
 
 
 export function App() {
@@ -45,63 +46,20 @@ export function App() {
 
   return (
     <div className="App">
-      {/*<header className="App-header">*/}
-      {/*    <h1>CAMB.io</h1>*/}
-      {/*    <h3>The Spotify/Apple Music Playlist Converter</h3>*/}
-      {/*    <div>*/}
-      {/*        <form onSubmit={(e) => {*/}
-      {/*            e.preventDefault();*/}
-      {/*            getPlaylistTracks();*/}
-      {/*        }}>*/}
-      {/*            <input type="text" onChange={e => {*/}
-      {/*                let id = e.target.value;*/}
-      {/*                id = id.replace("https://open.spotify.com/playlist/", "");*/}
-      {/*                setPlaylistID(id);*/}
-      {/*            }}*/}
-      {/*            />*/}
-      {/*            <button type={"submit"}>Search</button>*/}
-      {/*        </form>*/}
-      {/*        {!!playlist ?*/}
-      {/*            <div>*/}
-      {/*                New Playlist Name:*/}
-      {/*                <form onSubmit={(e) => {*/}
-      {/*                    e.preventDefault();*/}
-      {/*                    musicKit.authorize().then(async (val)=>{*/}
-      {/*                        await addToAppleLibrary(playlist, playlistName, musicKit);*/}
-      {/*                    })*/}
-      {/*                }}>*/}
-      {/*                    <input type="text" onChange={e => {*/}
-      {/*                        let name = e.target.value;*/}
-      {/*                        setPlaylistName(name);*/}
-      {/*                    }}*/}
-      {/*                    />*/}
-      {/*                    <button type={"submit"}>Convert!</button>*/}
-      {/*                </form>*/}
-      {/*            </div>*/}
-      {/*            : null}*/}
-      {/*    </div>*/}
-      {/*</header>*/}
       <div style={{
-        width: '100%',
-        height: '100%',
+        top: "25vh",
         position: 'relative',
-        background: '#F8894A'}}>
-        <div style={{
-          width: 909,
-          height: 240,
-          // left: 409,
-          // top: 273,
-          position: 'relative',
-          textAlign: 'center'}}>
+        textAlign: 'center'
+      }}>
           <span
-          style={{
-            color: 'black',
-            fontSize: 128,
-            fontFamily: 'Hammersmith One',
-            fontWeight: '400',
-            wordWrap: 'break-word'
-          }}>camb</span>
-          <span
+            style={{
+              color: 'black',
+              fontSize: 128,
+              fontFamily: 'Hammersmith One',
+              fontWeight: '400',
+              wordWrap: 'break-word'
+            }}>camb</span>
+        <span
           style={{
             color: 'white',
             fontSize: 128,
@@ -109,36 +67,42 @@ export function App() {
             fontWeight: '400',
             wordWrap: 'break-word'
           }}>.io</span>
-        </div>
-        <div style={{
-          width: 880,
-          height: 106,
-          // left: 424,
-          // top: 453,
-          position: 'relative',
-          color: 'white',
-          fontSize: 46.56,
-          fontFamily: 'Hammersmith One',
-          fontWeight: '400',
-          wordWrap: 'break-word'
-        }}>Transfer Spotify Playlists to Apple Music</div>
-        <button style={{
-          background: "linear-gradient(180deg, #6E9C4A 0%, rgba(47.95, 69.06, 31.37, 0.25) 100%)",
-          border: "none",
-          padding: "10px 20px",
-          textAlign: "center",
-          textDecoration: "none",
-          // display: "inline-block",
-          fontSize: 40,
-          fontFamily: 'Hammersmith One',
-          margin: "4px 2px",
-          cursor: "pointer",
-          borderRadius: "16px",
-          position: "relative"
-        }}
-        >
-          Start
-        </button>
+      </div>
+      <div style={{
+        top: "25vh",
+        position: 'relative',
+        color: 'white',
+        fontSize: 46.56,
+        fontFamily: 'Hammersmith One',
+        fontWeight: '400',
+        wordWrap: 'break-word'
+      }}>Transfer Spotify Playlists to Apple Music
+      </div>
+      <div style={{position: 'relative', top: '30vh', left: '28vw'}}>
+        <CustomizedInputBase onSubmit={getPlaylistTracks}
+                             onChange={e => {
+                                        let id = e.target.value;
+                                        id = id.replace("https://open.spotify.com/playlist/", "");
+                                        setPlaylistID(id)
+        }}/>
+        {!!playlist ?
+          <div style={{position: "relative", top: "30vh"}}>
+            New Playlist Name:
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              musicKit.authorize().then(async (val) => {
+                await addToAppleLibrary(playlist, playlistName, musicKit);
+              })
+            }}>
+              <input type="text" onChange={e => {
+                let name = e.target.value;
+                setPlaylistName(name);
+              }}
+              />
+              <button type={"submit"}>Convert!</button>
+            </form>
+          </div>
+          : null}
       </div>
     </div>
   );

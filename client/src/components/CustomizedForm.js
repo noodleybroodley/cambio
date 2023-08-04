@@ -10,18 +10,26 @@ export default function CustomizedForm(props) {
    * onSubmit: ()=>void
    * onChange: (e)=>void
    * icon: Icon element*/
+  const handleEnter = (e) => {
+    e.preventDefault();
+  }
   return (
     <Paper
       component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400, margin: 'auto'}}
+      sx={{p: '2px 4px', display: 'flex', alignItems: 'center', width: 400, margin: 'auto'}}
     >
       <InputBase
-        sx={{ ml: 1, flex: 1 }}
+        sx={{ml: 1, flex: 1}}
         placeholder={props.placeholder}
-        inputProps={{ 'aria-label': 'search playlist URL' }}
+        inputProps={{'aria-label': 'search playlist URL'}}
         onChange={props.onChange}
-      />
-      <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={props.onSubmit}>
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleEnter(e);
+            props.onSubmit();
+          }
+        }}/>
+          <IconButton type="button" sx={{p: '10px'}} onClick={props.onSubmit}>
         {props.icon}
       </IconButton>
     </Paper>

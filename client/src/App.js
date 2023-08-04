@@ -4,12 +4,14 @@ import {addToAppleLibrary, getMusicKitInstance} from './Apple/Apple-Helpers';
 import CustomizedForm from "./components/CustomizedForm";
 import SearchIcon from "@mui/icons-material/Search";
 import {ArrowRight} from "@mui/icons-material";
+import {PlaylistCard} from "./components/PlaylistCard/PlaylistCard";
 
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
   const [playlistName, setPlaylistName] = useState("");
   const [playlist, setPlaylist] = useState(undefined);
+  const [playlistTracks, setPlaylistTracks] = useState(undefined);
   const [musicKit, setMusicKit] = useState(undefined);
 
   async function login() {
@@ -30,14 +32,14 @@ export function App() {
     login();
   }, []);
 
-  function getPlaylistTracks() {
+  function getPlaylist() {
     /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
     let route = "/api/getPlaylist/" + playlistID;
     fetch(route).then(
       function (res) {
         res.json().then((data) => {
-          console.log(data);
-          setPlaylist(data);
+          setPlaylistTracks(data[0]);
+          setPlaylist(data[1].body);
         })
       },
       function (err) {
@@ -80,9 +82,10 @@ export function App() {
         wordWrap: 'break-word'
       }}>Transfer Spotify Playlists to Apple Music
       </div>
-      <div style={{position: 'relative', top: '30vh', /*left: '28vw'*/}}>
-        <CustomizedForm onSubmit={getPlaylistTracks}
+      <div style={{position: 'relative', top: '30vh'}}>
+        <CustomizedForm onSubmit={getPlaylist}
                         onChange={e => {
+                          e.preventDefault();
                           let id = e.target.value;
                           id = id.replace("https://open.spotify.com/playlist/", "");
                           setPlaylistID(id)
@@ -90,13 +93,21 @@ export function App() {
                         icon={<SearchIcon/>}
                         placeholder={"Spotify Playlist URL"}
         /></div>
-        {!!playlist ?
+      {!!playlist ?
+        <>
+          <PlaylistCard
+            name={playlist.name}
+            no_of_songs={playlistTracks.length}
+            images={playlist.images}
+            uid={playlist.id}
+          />
           <div style={{position: "relative", top: "40vh"}}>
             <CustomizedForm onSubmit={() => {
-                              musicKit.authorize().then(async (val) => {
-                                await addToAppleLibrary(playlist, playlistName, musicKit);
-                              })
-                            }}
+                                        musicKit.authorize().then(async (val) => {
+                                          let name = playlistName.length > 0 ? playlistName : playlist.name;
+                                          await addToAppleLibrary(playlistTracks, name, musicKit);
+                                        })
+                                      }}
                             onChange={e => {
                               let name = e.target.value;
                               setPlaylistName(name);
@@ -105,7 +116,9 @@ export function App() {
                             placeholder={"New Playlist Name"}
             />
           </div>
-          : null}
+
+        </>
+        : null}
 
     </div>
   );

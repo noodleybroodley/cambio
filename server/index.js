@@ -106,13 +106,14 @@ async function getSongs(id, offset) {
      * Return:
      * Object*/
     var songs = await spotifyApi.getPlaylistTracks(id, { offset: offset });
-    console.log(songs);
     return songs;
 }
 app.get("/api/getPlaylist/:id", async (req, res) => {
     /** Backend endpoint for getting all songs in a playlist*/
     var songs = await getAllSongs(req.params.id);
-    res.send(songs);
+    var playlist = await spotifyApi.getPlaylist(req.params.id);
+    console.log("playlist: ",playlist)
+    res.send([songs,playlist]);
 })
 
 //Apple Music

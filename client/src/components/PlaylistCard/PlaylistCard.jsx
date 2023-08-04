@@ -2,7 +2,8 @@ import React from 'react'
 import IconButton from "@mui/material/IconButton";
 import {CancelRounded} from "@mui/icons-material";
 
-export const PlaylistCard = props => {
+export function PlaylistCard (props) {
+  /** Playlist thumbnail component*/
   return (
     <div className="music"
          style={{backgroundColor: "black", height: 300, width: 300, margin: "auto", position: "relative", top: "35vh"}}>

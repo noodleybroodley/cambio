@@ -1,7 +1,9 @@
 import './App.css';
 import {useState, useEffect} from 'react';
 import {addToAppleLibrary, getMusicKitInstance} from './Apple/Apple-Helpers';
-import CustomizedInputBase from "./components/CustomizedInputBase";
+import CustomizedForm from "./components/CustomizedForm";
+import SearchIcon from "@mui/icons-material/Search";
+import {ArrowRight} from "@mui/icons-material";
 
 
 export function App() {
@@ -45,7 +47,7 @@ export function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" style={{left: "0vw"}}>
       <div style={{
         top: "25vh",
         position: 'relative',
@@ -78,32 +80,33 @@ export function App() {
         wordWrap: 'break-word'
       }}>Transfer Spotify Playlists to Apple Music
       </div>
-      <div style={{position: 'relative', top: '30vh', left: '28vw'}}>
-        <CustomizedInputBase onSubmit={getPlaylistTracks}
-                             onChange={e => {
-                                        let id = e.target.value;
-                                        id = id.replace("https://open.spotify.com/playlist/", "");
-                                        setPlaylistID(id)
-        }}/>
+      <div style={{position: 'relative', top: '30vh', /*left: '28vw'*/}}>
+        <CustomizedForm onSubmit={getPlaylistTracks}
+                        onChange={e => {
+                          let id = e.target.value;
+                          id = id.replace("https://open.spotify.com/playlist/", "");
+                          setPlaylistID(id)
+                        }}
+                        icon={<SearchIcon/>}
+                        placeholder={"Spotify Playlist URL"}
+        /></div>
         {!!playlist ?
-          <div style={{position: "relative", top: "30vh"}}>
-            New Playlist Name:
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              musicKit.authorize().then(async (val) => {
-                await addToAppleLibrary(playlist, playlistName, musicKit);
-              })
-            }}>
-              <input type="text" onChange={e => {
-                let name = e.target.value;
-                setPlaylistName(name);
-              }}
-              />
-              <button type={"submit"}>Convert!</button>
-            </form>
+          <div style={{position: "relative", top: "40vh"}}>
+            <CustomizedForm onSubmit={() => {
+                              musicKit.authorize().then(async (val) => {
+                                await addToAppleLibrary(playlist, playlistName, musicKit);
+                              })
+                            }}
+                            onChange={e => {
+                              let name = e.target.value;
+                              setPlaylistName(name);
+                            }}
+                            icon={<ArrowRight/>}
+                            placeholder={"New Playlist Name"}
+            />
           </div>
           : null}
-      </div>
+
     </div>
   );
 }

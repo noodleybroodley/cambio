@@ -7,7 +7,7 @@ export function PlaylistCard (props) {
   return (
     <div className="music"
          style={{backgroundColor: "black", height: 300, width: 300, margin: "auto", position: "relative", top: "35vh"}}>
-      <IconButton style={{color: "red"}}>
+      <IconButton style={{color: "red"}} onClick={props.onCancel}>
         <CancelRounded/>
       </IconButton>
       <div className="image-wrapper">

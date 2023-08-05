@@ -100,6 +100,10 @@ export function App() {
             no_of_songs={playlistTracks.length}
             images={playlist.images}
             uid={playlist.id}
+            onCancel={()=>{
+              setPlaylist(undefined);
+              setPlaylistTracks(undefined);
+            }}
           />
           <div style={{position: "relative", top: "40vh"}}>
             <CustomizedForm onSubmit={() => {

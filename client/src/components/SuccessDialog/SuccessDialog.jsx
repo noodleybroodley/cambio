@@ -48,23 +48,23 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export default function SuccessDialog() {
+export default function SuccessDialog(props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  useEffect(()=>{
-	const successSub = ClientEvent.subscribe('success',()=>{
-		setOpen(true);
-	})
+  useEffect(() => {
+    const openSub = ClientEvent.subscribe('stopped_loading', (songs) => {
+      setOpen(true);
+    })
 
-	return ()=>{
-		successSub.unsubscribe();
-	}
-  },[])
-  
+    return () => {
+      openSub.unsubscribe();
+    }
+  }, [])
+
   return (
     <div>
       <BootstrapDialog
@@ -73,13 +73,19 @@ export default function SuccessDialog() {
         open={open}
       >
         <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
-          Conversion Complete!
+          Transfer Complete!
         </BootstrapDialogTitle>
-        <DialogContent dividers>
-          <Typography gutterBottom>
-            These are the songs we couldn't find:
-          </Typography>
-        </DialogContent>
+        {props.invalidSongs.length > 0 ?
+          <DialogContent dividers>
+            <Typography style={{ textAlign: "center", fontWeight: "bold" }}>
+              We couldn't find:
+            </Typography>
+            {props.invalidSongs.map((song) =>
+              <Typography gutterBottom>
+                {song}
+              </Typography>
+            )}
+          </DialogContent> : null}
       </BootstrapDialog>
     </div>
   );

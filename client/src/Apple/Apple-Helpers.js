@@ -73,8 +73,7 @@ export async function addToAppleLibrary(playlist, name, musicKit) {
     Promise.all(res)
         .then(async (resolvedPlaylist) => {
             const invalidSongs = await createPlaylistInAppleLib({ name: name, tracks: resolvedPlaylist }, headers);
-            console.log("Invalid Songs: ", invalidSongs);
-            ClientEvent.emit('stopped_loading');
+            ClientEvent.emit('stopped_loading',invalidSongs);
         });
 
 }

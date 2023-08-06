@@ -3439,6 +3439,11 @@ clean-css@^5.2.2:
   dependencies:
     source-map "~0.6.0"
 
+clientevent@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/clientevent/-/clientevent-1.2.0.tgz#59f4b38f8c3d6b928819734e1ab5f224533d55f2"
+  integrity sha512-XKzuC6a+lGXHJL2xwwJCiEo8qbUHOnHUG5+4LC0Iz07WF+6r5EU4rAVw7w+W4dmkyCAQskXKPGO+O/5zz9VoOg==
+
 cliui@^7.0.2:
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-7.0.4.tgz#a0265ee655476fc807aea9df3df8df7783808b4f"

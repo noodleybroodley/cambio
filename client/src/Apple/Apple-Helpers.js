@@ -1,3 +1,5 @@
+import { ClientEvent } from "clientevent";
+
 export async function getMusicKitInstance() {
     /** Gets MusicKit Instance using Apple Dev Token
      * 
@@ -52,6 +54,7 @@ export async function addToAppleLibrary(playlist, name, musicKit) {
      * Promise<void>
     */
 
+    ClientEvent.emit('loading');
     var songsInPlaylists = [];
     playlist.forEach((item) => {
         songsInPlaylists.push({ a_name: item.artistName[0], t_name: item.trackName })
@@ -71,6 +74,7 @@ export async function addToAppleLibrary(playlist, name, musicKit) {
         .then(async (resolvedPlaylist) => {
             const invalidSongs = await createPlaylistInAppleLib({ name: name, tracks: resolvedPlaylist }, headers);
             console.log("Invalid Songs: ", invalidSongs);
+            ClientEvent.emit('stopped_loading');
         });
 
 }

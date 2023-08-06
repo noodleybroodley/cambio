@@ -5,6 +5,9 @@ import CustomizedForm from "./components/CustomizedForm";
 import SearchIcon from "@mui/icons-material/Search";
 import {ArrowRight} from "@mui/icons-material";
 import {PlaylistCard} from "./components/PlaylistCard/PlaylistCard";
+import {ClientEvent} from "clientevent";
+import {CircularProgress} from '@mui/material';
+import SuccessDialog from './components/SuccessDialog/SuccessDialog';
 
 
 export function App() {
@@ -13,6 +16,7 @@ export function App() {
   const [playlist, setPlaylist] = useState(undefined);
   const [playlistTracks, setPlaylistTracks] = useState(undefined);
   const [musicKit, setMusicKit] = useState(undefined);
+  const [isLoading,setLoading] = useState(false);
 
   async function login() {
     /*** Reaches out to the backend, authenticates with Spotify using developer token
@@ -27,10 +31,6 @@ export function App() {
     let kit = await getMusicKitInstance();
     setMusicKit(kit);
   };
-
-  useEffect(() => {
-    login();
-  }, []);
 
   function getPlaylist() {
     /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
@@ -48,8 +48,26 @@ export function App() {
     )
   }
 
+  useEffect(() => {
+    login();
+    const loadingSub = ClientEvent.subscribe('loading',()=>{
+      console.log("start it")
+      setLoading(true);
+    })
+    const stopLoadSub = ClientEvent.subscribe('stopped_loading',()=>{
+      console.log("stop it")
+      setLoading(false);
+      ClientEvent.emit('success')
+    })
+    return ()=>{
+      loadingSub.unsubscribe();
+      stopLoadSub.unsubscribe();
+
+    }
+  }, []);
+
   return (
-    <div className="App" style={{left: "0vw"}}>
+    <div className="App">
       <div style={{
         top: "25vh",
         position: 'relative',
@@ -111,19 +129,20 @@ export function App() {
                                           let name = playlistName.length > 0 ? playlistName : playlist.name;
                                           await addToAppleLibrary(playlistTracks, name, musicKit);
                                         })
+                                        
                                       }}
                             onChange={e => {
                               let name = e.target.value;
                               setPlaylistName(name);
                             }}
                             icon={<ArrowRight/>}
-                            placeholder={"New Playlist Name"}
+                            placeholder={"New Playlist Name (or Press Enter)"}
             />
+            {isLoading ? <CircularProgress style={{position: "relative",left: "-25vw",top: "-8vh"}}/> : null}
           </div>
-
         </>
         : null}
-
+      <SuccessDialog/>
     </div>
   );
 }

@@ -13,3 +13,6 @@ A React App that takes a Spotify Playlist URL and transfers the playlist to the 
    <img width="416" alt="image" src="https://github.com/noodleybroodley/cambio/assets/70674712/bc4bde85-5682-47c2-b134-e258a09bbf37">
 3. Run command `yarn start` in both the `server` and `client` directories.
 4. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+## Credits:
+Many thanks to Uma Abu, his playlist converter project was invaluable to creating this application! Check it out at https://github.com/ueabu/spotify-to-apple-music.

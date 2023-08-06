@@ -51,11 +51,9 @@ export function App() {
   useEffect(() => {
     login();
     const loadingSub = ClientEvent.subscribe('loading', () => {
-      console.log("start it")
       setLoading(true);
     })
     const stopLoadSub = ClientEvent.subscribe('stopped_loading', (songs) => {
-      console.log("stop it");
       setInvalidSongs(songs);
       setLoading(false);
     })

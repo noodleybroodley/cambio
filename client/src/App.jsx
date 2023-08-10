@@ -8,6 +8,7 @@ import { PlaylistCard } from "./components/PlaylistCard/PlaylistCard";
 import { ClientEvent } from "clientevent";
 import { CircularProgress } from '@mui/material';
 import SuccessDialog from './components/SuccessDialog/SuccessDialog';
+import ErrorDialog from './components/ErrorDialog';
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
@@ -35,16 +36,16 @@ export function App() {
   function getPlaylist() {
     /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
     let route = "/api/getPlaylist/" + playlistID;
-    fetch(route).then(
-      function (res) {
-        res.json().then((data) => {
+    fetch(route).then((res) => {
+      res.json().then((data) => {
+        if (data[0].body?.error) {
+          ClientEvent.emit('error', { type: "Playlist Error", message: "Enter valid playlist URL!" });
+        } else {
           setPlaylistTracks(data[0]);
           setPlaylist(data[1].body);
-        })
-      },
-      function (err) {
-        console.log('Could not retrieve playlist')
-      }
+        }
+      })
+    }
     )
   }
 
@@ -140,6 +141,7 @@ export function App() {
         </>
         : null}
       <SuccessDialog invalidSongs={invalidSongs} />
+      <ErrorDialog/>
     </div>
   );
 }

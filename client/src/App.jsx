@@ -1,6 +1,6 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import { addToAppleLibrary, getMusicKitInstance } from './Apple/Apple-Helpers';
+import { addToAppleLibrary, getMusicKitInstance } from './Apple/AppleHelpers';
 import CustomizedForm from "./components/CustomizedForm";
 import SearchIcon from "@mui/icons-material/Search";
 import { ArrowRight } from "@mui/icons-material";
@@ -9,6 +9,7 @@ import { ClientEvent } from "clientevent";
 import { CircularProgress } from '@mui/material';
 import SuccessDialog from './components/SuccessDialog/SuccessDialog';
 import ErrorDialog from './components/ErrorDialog';
+import {login,getPlaylist} from './Spotify/SpotifyHelpers';
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
@@ -19,38 +20,8 @@ export function App() {
   const [isLoading, setLoading] = useState(false);
   const [invalidSongs, setInvalidSongs] = useState([]);
 
-  async function login() {
-    /*** Reaches out to the backend, authenticates with Spotify using developer token
-     * and creates an Apple MusicKit instance.
-     */
-    fetch("/api/login").then(response => response.json())
-      .then(res => {
-        console.log("Spotify Auth Successful!")
-      }).catch(error => {
-        console.log(error)
-      })
-    let kit = await getMusicKitInstance();
-    setMusicKit(kit);
-  };
-
-  function getPlaylist() {
-    /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
-    let route = "/api/getPlaylist/" + playlistID;
-    fetch(route).then((res) => {
-      res.json().then((data) => {
-        if (data[0].body?.error) {
-          ClientEvent.emit('error', { type: "Playlist Error", message: "Enter valid playlist URL!" });
-        } else {
-          setPlaylistTracks(data[0]);
-          setPlaylist(data[1].body);
-        }
-      })
-    }
-    )
-  }
-
   useEffect(() => {
-    login();
+    login(getMusicKitInstance,setMusicKit);
     const loadingSub = ClientEvent.subscribe('loading', () => {
       setLoading(true);
     })
@@ -100,7 +71,7 @@ export function App() {
       }}>Transfer Spotify Playlists to Apple Music
       </div>
       <div style={{ position: 'relative', top: '30vh' }}>
-        <CustomizedForm onSubmit={getPlaylist}
+        <CustomizedForm onSubmit={()=>getPlaylist(playlistID,setPlaylistTracks,setPlaylist)}
           onChange={e => {
             e.preventDefault();
             let id = e.target.value;

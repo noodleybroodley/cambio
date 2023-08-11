@@ -4,7 +4,7 @@ export async function login(getMusicKitInstance,setMusicKit) {
 	/*** Reaches out to the backend, authenticates with Spotify using developer token
      * and creates an Apple MusicKit instance.
      */
-    fetch(`${process.env.REACT_APP_ROUTE}/api/login`).then(response => response.json())
+    fetch(process.env.REACT_APP_ROUTE+"/api/login").then(response => response.json())
       .then(res => {
         console.log("Spotify Auth Successful!")
       }).catch(error => {

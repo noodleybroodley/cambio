@@ -3,15 +3,10 @@ const app = express();
 const SpotifyWebApi = require('spotify-web-api-node');
 require('dotenv').config();
 
-const cors = require('cors');
-app.use(cors({
-    origin: process.env.BACKEND_ROUTE
-}));
-
 let spotifyApi = new SpotifyWebApi({
     clientId: `${process.env.REACT_APP_ID}`,
     clientSecret: `${process.env.REACT_APP_SECRET}`,
-    redirectUri: process.env.BACKEND_ROUTE + "/"
+    redirectUri: "http://localhost:3000/"
 });
 
 app.get("/api/login", (req, res) => {

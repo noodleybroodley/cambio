@@ -63,7 +63,6 @@ async function getAllSongs(id) {
      * {trackName: String, artistName: String[], albumName: String, albumArtist: String[]}[]
      * */
     var data = await spotifyApi.getPlaylistTracks(id);
-    console.log("playlist: ", data.body);
     var numBatches = Math.floor(data.body.total / 100) + 1;
     var promises = [];
     for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -111,10 +110,10 @@ async function getSongs(id, offset) {
 app.get("/api/getPlaylist/:id", async (req, res) => {
     /** Backend endpoint for getting all songs in a playlist*/
     var songs = await getAllSongs(req.params.id).catch(err => err);
-    console.log("songs: ", songs);
     var playlist = await spotifyApi.getPlaylist(req.params.id).catch(err => err);
+    let message = playlist.body?.error ? `request failed because of ${playlist.body?.error.message}` : "got playlist successfully";
+    console.log("hit getPlaylist endpoint, ",message);
     res.send([songs, playlist]);
-
 })
 
 //Apple Music

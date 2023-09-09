@@ -13,9 +13,12 @@ A React App that takes a Spotify Playlist URL and transfers the playlist to the 
 1. After cloning the project repo, run the command `yarn` in both the `client` and `server` directories.
 2. Create an .env file in the server directory with both the Apple and Spotify client credentials (example below).
 <br/>
-   <img width="416" alt="image" src="./client/public/env.png">
-3. Run command `yarn start` in the `server` directory and secondly in the `client` directory.
-4. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+   <img width="416" alt="image" src="./client/public/server_env.png">
+3. Create an .env file in the client directory with the backend route stored in it (example below).
+<br/>
+   <img width="416" alt="image" src="./client/public/client_env.png">
+4. Run command `yarn start` in the `server` directory and secondly in the `client` directory.
+5. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 ### Note: I've noticed some incompatibility issues with the Chrome plugin `Night Mode Pro`, I'm working to resolve this.
 

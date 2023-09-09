@@ -23,7 +23,7 @@ export function App() {
     /*** Reaches out to the backend, authenticates with Spotify using developer token
      * and creates an Apple MusicKit instance.
      */
-    fetch("/api/login").then(response => response.json())
+    fetch(`${process.env.REACT_APP_BACKEND_ROUTE}/api/login`).then(response => response.json())
       .then(res => {
         console.log("Spotify Auth Successful!")
       }).catch(error => {
@@ -35,7 +35,7 @@ export function App() {
 
   function getPlaylist() {
     /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
-    let route = "/api/getPlaylist/" + playlistID;
+    let route = `${process.env.REACT_APP_BACKEND_ROUTE}/api/getPlaylist/` + playlistID;
     fetch(route).then((res) => {
       res.json().then((data) => {
         if (data[0].body?.error) {

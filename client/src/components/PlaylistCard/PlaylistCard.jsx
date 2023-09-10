@@ -6,7 +6,7 @@ export function PlaylistCard (props) {
   /** Playlist thumbnail component*/
   return (
     <div className="music"
-         style={{backgroundColor: "black", height: 300, width: 300, margin: "auto", position: "relative", top: "35vh"}}>
+         style={{backgroundColor: "black", height: 300, width: 300, margin: "auto", position: "relative", top: "10vh"}}>
       <IconButton style={{color: "red"}} onClick={props.onCancel}>
         <CancelRounded/>
       </IconButton>

@@ -68,7 +68,7 @@ export function App() {
   return (
     <div className="App">
       <div style={{
-        top: "25vh",
+        top: !!playlist ? "0vh":"25vh",
         position: 'relative',
         textAlign: 'center'
       }}>
@@ -90,7 +90,7 @@ export function App() {
           }}>.io</span>
       </div>
       <div style={{
-        top: "25vh",
+        top: !!playlist ? "0vh":"25vh",
         position: 'relative',
         color: 'white',
         fontSize: '5vw',
@@ -99,7 +99,7 @@ export function App() {
         wordWrap: 'break-word'
       }}>Transfer Spotify Playlists to Apple Music
       </div>
-      <div style={{ position: 'relative', top: '30vh' }}>
+      <div style={{ position: 'relative', top: !!playlist ? "5vh":"30vh" }}>
         <CustomizedForm onSubmit={getPlaylist}
           onChange={e => {
             e.preventDefault();
@@ -122,13 +122,14 @@ export function App() {
               setPlaylistTracks(undefined);
             }}
           />
-          <div style={{ position: "relative", top: "40vh" }}>
-            <CustomizedForm onSubmit={() => {
-              musicKit.authorize().then(async (val) => {
-                let name = playlistName.length > 0 ? playlistName : playlist.name;
-                await addToAppleLibrary(playlistTracks, name, musicKit);
-              })
-            }}
+          <div style={{ position: "relative", top: "15vh" }}>
+            <CustomizedForm
+              onSubmit={() => {
+                musicKit.authorize().then(async (val) => {
+                  let name = playlistName.length > 0 ? playlistName : playlist.name;
+                  await addToAppleLibrary(playlistTracks, name, musicKit);
+                })
+              }}
               onChange={e => {
                 let name = e.target.value;
                 setPlaylistName(name);

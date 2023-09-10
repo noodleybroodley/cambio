@@ -75,7 +75,7 @@ export function App() {
         <span
           style={{
             color: 'black',
-            fontSize: 128,
+            fontSize: '10vw',
             fontFamily: 'Hammersmith One',
             fontWeight: '400',
             wordWrap: 'break-word'
@@ -83,7 +83,7 @@ export function App() {
         <span
           style={{
             color: 'white',
-            fontSize: 128,
+            fontSize: '10vw',
             fontFamily: 'Hammersmith One',
             fontWeight: '400',
             wordWrap: 'break-word'
@@ -93,7 +93,7 @@ export function App() {
         top: "25vh",
         position: 'relative',
         color: 'white',
-        fontSize: 46.56,
+        fontSize: '5vw',
         fontFamily: 'Hammersmith One',
         fontWeight: '400',
         wordWrap: 'break-word'

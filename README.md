@@ -18,7 +18,7 @@ A React App that takes a Spotify Playlist URL and transfers the playlist to the 
 <br/>
    <img width="416" alt="image" src="./client/public/client_env.png">
 4. Run command `yarn start` in the `server` directory and secondly in the `client` directory.
-5. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+5. Open http://localhost:3000 to view it in your browser.
 
 ### Note: I've noticed some incompatibility issues with the Chrome plugin `Night Mode Pro`, I'm working to resolve this.
 

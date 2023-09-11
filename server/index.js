@@ -70,34 +70,33 @@ async function getAllSongs(id) {
     var data = await spotifyApi.getPlaylistTracks(id);
     var numBatches = Math.floor(data.body.total / 100) + 1;
     var promises = [];
+    var songs = [];
+
     for (let batchNum = 0; batchNum < numBatches; batchNum++) {
-        var promise = getSongs(id, batchNum * 100);
+        //Create an array of promises that will process and structure song data
+        var promise = getSongs(id, batchNum * 100).then(data=>{
+            data.body.items.forEach((data) => {
+                let cur = {};
+                if (data.track !== null) {
+                    cur["trackName"] = extractSongName(data.track.name);
+                    cur["artistName"] = [];
+                    data.track.artists.forEach((artist) => {
+                        cur["artistName"].push(artist.name)
+                    })
+                    // add album parameters
+                    cur["albumName"] = data.track.album.name
+                    cur["albumArtist"] = []
+                    data.track.album.artists.forEach((artist) => {
+                        cur["albumArtist"].push(artist.name)
+                    })
+                    songs.push(cur)
+                }
+            })
+        });
         promises.push(promise);
     }
-    var rawSongData = await Promise.all(promises);
-    var songs = [];
-    for (let i = 0; i < rawSongData.length; i++) {
-        let editedSongs = [];
-        rawSongData[i].body.items.forEach((data) => {
-            let cur = {};
-            if (data.track !== null) {
-                cur["trackName"] = extractSongName(data.track.name);
-                cur["artistName"] = [];
-                data.track.artists.forEach((artist) => {
-                    cur["artistName"].push(artist.name)
-                })
-                // add album parameters
-                cur["albumName"] = data.track.album.name
-                cur["albumArtist"] = []
-                data.track.album.artists.forEach((artist) => {
-                    cur["albumArtist"].push(artist.name)
-                })
-                editedSongs.push(cur)
-            }
-        })
-        songs = songs.concat(editedSongs)
-        // songs = songs.concat(rawSongData[i].body.items);
-    }
+    var finalPromise = await Promise.all(promises);
+    
     return songs;
 }
 

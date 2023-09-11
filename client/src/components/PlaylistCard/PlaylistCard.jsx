@@ -1,6 +1,7 @@
 import React from 'react'
 import IconButton from "@mui/material/IconButton";
 import {CancelRounded} from "@mui/icons-material";
+import { CircularProgress } from '@mui/material';
 
 export function PlaylistCard (props) {
   /** Playlist thumbnail component*/
@@ -11,7 +12,9 @@ export function PlaylistCard (props) {
         <CancelRounded/>
       </IconButton>
       <div className="image-wrapper">
+      {props.isLoading ? <CircularProgress style={{height: 200, width: 200, color: "white"}}/> : 
         <img id={props.uid} src={props.images[0].url} alt="Song cover" style={{height: 200, width: 200}}/>
+      }
       </div>
       <div className="right">
         <span className="name"

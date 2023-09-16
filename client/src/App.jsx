@@ -1,14 +1,13 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import { addToAppleLibrary, getMusicKitInstance } from './Apple/Apple-Helpers';
-import CustomizedForm from "./components/CustomizedForm";
-import SearchIcon from "@mui/icons-material/Search";
-import { ArrowRight } from "@mui/icons-material";
-import { PlaylistCard } from "./components/PlaylistCard/PlaylistCard";
+import { getMusicKitInstance } from './Apple/Apple-Helpers';
 import { ClientEvent } from "clientevent";
 import SuccessDialog from './components/SuccessDialog/SuccessDialog';
 import ErrorDialog from './components/ErrorDialog';
 import { CircularProgress } from '@mui/material';
+import Title from './components/Title';
+import PlaylistSearchBar from './components/CustomizedForm/PlaylistSearchBar';
+import PlaylistInfo from './components/PlaylistInfo/PlaylistInfo';
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
@@ -18,7 +17,7 @@ export function App() {
   const [musicKit, setMusicKit] = useState(undefined);
   const [isLoading, setLoading] = useState(false);
   const [invalidSongs, setInvalidSongs] = useState([]);
-  const [hasAuth,setHasAuth] = useState(false);
+  const [hasAuth, setHasAuth] = useState(false);
 
   async function login() {
     /*** Reaches out to the backend, authenticates with Spotify using developer token
@@ -70,89 +69,41 @@ export function App() {
   return (
     <div className="App">
       {hasAuth ?
-      <>
-      <div style={{
-        top: !!playlist ? "0vh":"25vh",
-        position: 'relative',
-        textAlign: 'center'
-      }}>
-        <span
-          style={{
-            color: 'black',
-            fontSize: '10vw',
-            fontFamily: 'Hammersmith One',
-            fontWeight: '400',
-            wordWrap: 'break-word'
-          }}>camb</span>
-        <span
-          style={{
-            color: 'white',
-            fontSize: '10vw',
-            fontFamily: 'Hammersmith One',
-            fontWeight: '400',
-            wordWrap: 'break-word'
-          }}>.io</span>
-      </div>
-      <div style={{
-        top: !!playlist ? "0vh":"25vh",
-        position: 'relative',
-        color: 'white',
-        fontSize: '5vw',
-        fontFamily: 'Hammersmith One',
-        fontWeight: '400',
-        wordWrap: 'break-word'
-      }}>Transfer Spotify Playlists to Apple Music
-      </div>
-      <div style={{ position: 'relative', top: !!playlist ? "5vh":"30vh" }}>
-        <CustomizedForm onSubmit={getPlaylist}
-          onChange={e => {
-            e.preventDefault();
-            let id = e.target.value;
-            id = id.replace("https://open.spotify.com/playlist/", "");
-            setPlaylistID(id)
-          }}
-          icon={<SearchIcon />}
-          placeholder={"Spotify Playlist URL"}
-        /></div>
-      {!!playlist ?
         <>
-          <PlaylistCard
-            name={playlist.name}
-            no_of_songs={playlistTracks.length}
-            images={playlist.images}
-            uid={playlist.id}
-            isLoading={isLoading}
-            onCancel={() => {
-              setPlaylist(undefined);
-              setPlaylistTracks(undefined);
+          <Title hasPlaylist={!!playlist} />
+          <PlaylistSearchBar
+            hasPlaylist={!!playlist}
+            onSubmit={getPlaylist}
+            onChange={e => {
+              e.preventDefault();
+              let id = e.target.value;
+              id = id.replace("https://open.spotify.com/playlist/", "");
+              setPlaylistID(id)
             }}
           />
-          <div style={{ position: "relative", top: "15vh"}}>
-            <CustomizedForm
-              style={{display: "flex"}}
-              onSubmit={() => {
-                musicKit.authorize().then(async (val) => {
-                  let name = playlistName.length > 0 ? playlistName : playlist.name;
-                  await addToAppleLibrary(playlistTracks, name, musicKit);
-                })
-              }}
-              onChange={e => {
-                let name = e.target.value;
-                setPlaylistName(name);
-              }}
-              icon={<ArrowRight />}
-              placeholder={"New Playlist Name (or Press Enter)"}
+          {!!playlist ?
+            <PlaylistInfo
+              playlist={playlist}
+              playlistTracks={playlistTracks}
+              isLoading={isLoading}
+              setPlaylist={setPlaylist}
+              setPlaylistTracks={setPlaylistTracks}
+              musicKit={musicKit}
+              playlistName={playlistName}
+              setPlaylistName={setPlaylistName}
             />
-          </div>
+            :
+            null
+          }
+          <SuccessDialog invalidSongs={invalidSongs} />
+          <ErrorDialog />
         </>
-        : null}
-      <SuccessDialog invalidSongs={invalidSongs} />
-      <ErrorDialog/></> :
-      <div style={{position: "relative", top: "40vh"}}>
-        <div>Loading...</div>
-        <CircularProgress style={{height: 300, width: 300, color: "white"}}/>
-      </div>}
-      
+        :
+        <div style={{ position: "relative", top: "40vh" }}>
+          <div>Loading...</div>
+          <CircularProgress style={{ height: 300, width: 300, color: "white" }} />
+        </div>
+      }
     </div>
   );
 }

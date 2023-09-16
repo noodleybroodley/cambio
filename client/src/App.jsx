@@ -8,6 +8,7 @@ import { PlaylistCard } from "./components/PlaylistCard/PlaylistCard";
 import { ClientEvent } from "clientevent";
 import SuccessDialog from './components/SuccessDialog/SuccessDialog';
 import ErrorDialog from './components/ErrorDialog';
+import { CircularProgress } from '@mui/material';
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
@@ -17,6 +18,7 @@ export function App() {
   const [musicKit, setMusicKit] = useState(undefined);
   const [isLoading, setLoading] = useState(false);
   const [invalidSongs, setInvalidSongs] = useState([]);
+  const [hasAuth,setHasAuth] = useState(false);
 
   async function login() {
     /*** Reaches out to the backend, authenticates with Spotify using developer token
@@ -24,6 +26,7 @@ export function App() {
      */
     fetch(`${process.env.REACT_APP_BACKEND_ROUTE}/api/login`).then(response => response.json())
       .then(res => {
+        setHasAuth(true);
         console.log("Spotify Auth Successful!")
       }).catch(error => {
         console.log(error)
@@ -66,6 +69,8 @@ export function App() {
 
   return (
     <div className="App">
+      {hasAuth ?
+      <>
       <div style={{
         top: !!playlist ? "0vh":"25vh",
         position: 'relative',
@@ -142,7 +147,12 @@ export function App() {
         </>
         : null}
       <SuccessDialog invalidSongs={invalidSongs} />
-      <ErrorDialog/>
+      <ErrorDialog/></> :
+      <div style={{position: "relative", top: "40vh"}}>
+        <div>Loading...</div>
+        <CircularProgress style={{height: 300, width: 300, color: "white"}}/>
+      </div>}
+      
     </div>
   );
 }

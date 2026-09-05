@@ -4,14 +4,27 @@ const SpotifyWebApi = require('spotify-web-api-node');
 require('dotenv').config();
 
 const cors = require('cors');
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+].filter(Boolean);
+
 app.use(cors({
-    origin: `${process.env.FRONTEND_URL}`
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+
+        callback(new Error('Not allowed by CORS'));
+    }
 }));
 
 let spotifyApi = new SpotifyWebApi({
     clientId: `${process.env.REACT_APP_ID}`,
     clientSecret: `${process.env.REACT_APP_SECRET}`,
-    redirectUri: `${process.env.FRONTEND_URL}/`
+    redirectUri: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/`
 });
 
 app.get("/api/login", (req, res) => {

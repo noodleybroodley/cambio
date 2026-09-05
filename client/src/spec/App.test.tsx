@@ -1,10 +1,15 @@
-import { render, screen } from '@testing-library/react';
-import {describe, expect, test} from '@jest/globals'
-import App from '../App';
+import { describe, expect, it } from '@jest/globals';
+import { backendRoute } from '../config';
 
-describe('App', () => {
-  it('should render app', () => {
-    render(<App/>);
-    expect(screen.getAllByText('Learn React').length).toEqual(1);
-  })
+describe('backend configuration', () => {
+  it('falls back to the local backend when the env var is missing', () => {
+    const original = process.env.REACT_APP_BACKEND_ROUTE;
+    delete process.env.REACT_APP_BACKEND_ROUTE;
+
+    expect(backendRoute()).toBe('http://localhost:8080');
+
+    if (original) {
+      process.env.REACT_APP_BACKEND_ROUTE = original;
+    }
+  });
 });

@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import { useState, useEffect } from 'react';
 import { getMusicKitInstance } from './Apple/Apple-Helpers';
 import { ClientEvent } from "clientevent";
 import SuccessDialog from './components/SuccessDialog/SuccessDialog';
@@ -8,6 +8,7 @@ import { CircularProgress } from '@mui/material';
 import Title from './components/Title';
 import PlaylistSearchBar from './components/CustomizedForm/PlaylistSearchBar';
 import PlaylistInfo from './components/PlaylistInfo/PlaylistInfo';
+import { backendRoute } from './config';
 
 export function App() {
   const [playlistID, setPlaylistID] = useState("");
@@ -23,7 +24,7 @@ export function App() {
     /*** Reaches out to the backend, authenticates with Spotify using developer token
      * and creates an Apple MusicKit instance.
      */
-    fetch(`${process.env.REACT_APP_BACKEND_ROUTE}/api/login`).then(response => response.json())
+    fetch(`${backendRoute()}/api/login`).then(response => response.json())
       .then(res => {
         setHasAuth(true);
         console.log("Spotify Auth Successful!")
@@ -36,7 +37,7 @@ export function App() {
 
   function getPlaylist() {
     /*** Reaches out to the backend and uses the given playlist ID to retrieve all playlist tracks.*/
-    let route = `${process.env.REACT_APP_BACKEND_ROUTE}/api/getPlaylist/` + playlistID;
+    let route = `${backendRoute()}/api/getPlaylist/` + playlistID;
     fetch(route).then((res) => {
       res.json().then((data) => {
         if (data[0].body?.error) {

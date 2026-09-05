@@ -1,3 +1,4 @@
+import React from 'react';
 import CustomizedForm from "./CustomizedForm";
 import SearchIcon from "@mui/icons-material/Search";
 

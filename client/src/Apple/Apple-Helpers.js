@@ -1,4 +1,5 @@
 import { ClientEvent } from "clientevent";
+import { backendRoute } from '../config';
 
 export async function getMusicKitInstance() {
     /** Gets MusicKit Instance using Apple Dev Token
@@ -8,7 +9,7 @@ export async function getMusicKitInstance() {
     */
     const appleInstance = window.MusicKit;
     let musicKit;
-    return fetch(`${process.env.REACT_APP_BACKEND_ROUTE}/api/appleToken`).then(response => response.json())
+    return fetch(`${backendRoute()}/api/appleToken`).then(response => response.json())
         .then(res => {
             appleInstance.configure({
                 developerToken: res.token,

@@ -14,26 +14,23 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "axios": "^1.12.2",
-    "browserify-sign": "^4.2.5",
     "browserify-zlib": "^0.2.0",
     "clientevent": "^1.2.0",
     "express": "^5.1.0",
     "follow-redirects": "^1.15.11",
-    "node-polyfill-webpack-plugin": "^4.1.0",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-scripts": "^5.0.1",
     "spotify-web-api-node": "^5.0.2",
     "typescript": "^4.9.5",
-    "web-vitals": "^5.1.0",
-    "webpack-dev-server": ">5.2.1"
+    "web-vitals": "^5.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "start": "vite --host 0.0.0.0 --port 3000",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "test": "vitest run"
   },
   "eslintConfig": {
     "extends": [
@@ -64,6 +61,10 @@
     "nth-check": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@vitejs/plugin-react": "^4.0.0",
+    "jsdom": "^27.0.0",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.4"
   }
 }

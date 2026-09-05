@@ -1,11 +1,15 @@
 export function backendRoute() {
-  const viteRoute = typeof import.meta !== 'undefined' && import.meta.env
-    ? import.meta.env.VITE_BACKEND_ROUTE || import.meta.env.REACT_APP_BACKEND_ROUTE
-    : undefined;
+  const viteEnv = typeof import.meta !== 'undefined' && import.meta && import.meta.env
+    ? import.meta.env
+    : {};
 
-  const nodeRoute = typeof process !== 'undefined' && process.env
-    ? process.env.REACT_APP_BACKEND_ROUTE || process.env.VITE_BACKEND_ROUTE
-    : undefined;
+  const configuredRoute = (
+    viteEnv.VITE_BACKEND_ROUTE ||
+    viteEnv.REACT_APP_BACKEND_ROUTE ||
+    (typeof globalThis !== 'undefined' && globalThis.process && globalThis.process.env
+      ? globalThis.process.env.REACT_APP_BACKEND_ROUTE || globalThis.process.env.VITE_BACKEND_ROUTE
+      : undefined)
+  ) || 'http://localhost:8080';
 
-  return (viteRoute || nodeRoute || 'http://localhost:8080').replace(/\/$/, '');
+  return configuredRoute.replace(/\/$/, '');
 }
